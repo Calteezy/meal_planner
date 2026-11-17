@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f6f3ee">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Dinners">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>Dinner Rotation</title>
+<style id="css">
+:root{--bg:#f6f3ee;--card:#fffdf9;--ink:#1f1f1c;--mute:#77736b;--line:#e6e0d6;--acc:#2f5d46;--acc2:#e7efe9;--warn:#b5651d;--warnbg:#fbeee0;--red:#b3392f;--r:14px}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+.app{max-width:560px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 14px) 16px calc(env(safe-area-inset-bottom) + 150px)}
+header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+h1{font-size:22px;margin:0;letter-spacing:-.01em}
+.pill{font-size:12px;padding:3px 9px;border-radius:99px;background:var(--acc2);color:var(--acc);opacity:0;transition:opacity .2s}
+.pill.on{opacity:1}
+.banner{font-size:13px;background:var(--warnbg);color:var(--warn);padding:8px 12px;border-radius:10px;margin-bottom:12px}
+.weeknav{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:8px;margin-bottom:14px}
+.weeknav button{width:40px;height:40px;border:0;background:var(--bg);border-radius:10px;font-size:20px}
+.weeknav .mid{flex:1;text-align:center}
+.weeknav .rel{font-weight:600}
+.weeknav .dt{font-size:13px;color:var(--mute)}
+.lockbadge{display:inline-block;font-size:11px;font-weight:600;background:var(--acc);color:#fff;border-radius:99px;padding:1px 8px;margin-left:6px;vertical-align:2px}
+.sec{font-size:13px;font-weight:600;color:var(--mute);text-transform:uppercase;letter-spacing:.05em;margin:18px 2px 8px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:inline-flex;align-items:center;gap:6px;background:var(--acc);color:#fff;border:0;border-radius:99px;padding:7px 12px;font-size:15px}
+.chip span{opacity:.75}
+.empty{color:var(--mute);font-size:14px;padding:12px 2px}
+.search{width:100%;padding:11px 14px;border:1px solid var(--line);border-radius:12px;background:var(--card);outline:none}
+.search:focus,.addrow input:focus,.sheet input:focus{border-color:var(--acc)}
+.list{background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;margin-top:10px}
+.row{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:0;border-bottom:1px solid var(--line);background:none;padding:13px 14px;min-height:56px}
+.row:last-child{border-bottom:0}
+.row .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.row .ago{font-size:13px;color:var(--mute);white-space:nowrap;text-align:right}
+.row .ago small{display:block;font-size:11px;opacity:.8}
+.row.old .ago{color:var(--warn)}
+.row.never .ago{color:var(--acc);font-weight:600}
+.tick{width:24px;height:24px;border-radius:50%;border:2px solid var(--line);flex:none;display:grid;place-items:center;font-size:14px;color:#fff}
+.row.sel .tick{background:var(--acc);border-color:var(--acc)}
+.row.sel{background:var(--acc2)}
+.addrow{display:flex;gap:8px}
+.addrow input{flex:1;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--card);outline:none;min-width:0}
+.btn{border:0;border-radius:12px;padding:12px 16px;background:var(--acc);color:#fff;font-weight:600}
+.btn:disabled{opacity:.4}
+.btn.ghost{background:var(--card);color:var(--ink);border:1px solid var(--line)}
+.btn.danger{background:none;color:var(--red);border:1px solid #e8c9c5}
+.btn.danger.arm{background:var(--red);color:#fff}
+.btn.full{width:100%}
+.seg{display:flex;background:var(--line);border-radius:10px;padding:3px;margin-top:12px}
+.seg button{flex:1;border:0;background:none;border-radius:8px;padding:7px;font-size:14px;color:var(--mute)}
+.seg button.on{background:var(--card);color:var(--ink);font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.dock{position:fixed;left:0;right:0;bottom:0;background:rgba(246,243,238,.94);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-top:1px solid var(--line);padding:10px 16px calc(env(safe-area-inset-bottom) + 8px)}
+.dock .in{max-width:560px;margin:0 auto}
+.dock .act{margin-bottom:10px}
+.tabs{display:flex;gap:8px}
+.tabs a{flex:1;text-align:center;text-decoration:none;color:var(--mute);padding:8px;border-radius:10px;font-weight:600;font-size:15px}
+.tabs a.on{color:var(--acc);background:var(--acc2)}
+.ov{position:fixed;inset:0;background:rgba(20,20,18,.35);display:flex;align-items:flex-end;justify-content:center;z-index:10}
+.sheet{background:var(--bg);width:100%;max-width:560px;border-radius:20px 20px 0 0;padding:18px 16px calc(env(safe-area-inset-bottom) + 18px);max-height:88vh;overflow:auto}
+.sheet h2{margin:0 0 12px;font-size:18px}
+.sheet label{display:block;font-size:13px;color:var(--mute);margin:14px 2px 6px}
+.sheet input{width:100%;padding:11px 14px;border:1px solid var(--line);border-radius:12px;background:var(--card);outline:none}
+.hist{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.hist div{display:flex;justify-content:space-between;align-items:center;padding:8px 8px 8px 14px;border-bottom:1px solid var(--line);font-size:15px}
+.hist div:last-child{border-bottom:0}
+.hist button{border:0;background:none;color:var(--mute);font-size:18px;width:36px;height:32px}
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 140px);transform:translateX(-50%);background:var(--ink);color:#fff;padding:9px 16px;border-radius:99px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:20;white-space:nowrap}
+.toast.on{opacity:1}
+.note{font-size:13px;color:var(--mute);margin-top:10px}
+.backup{margin-top:28px;padding-top:16px;border-top:1px solid var(--line)}
+.backup .btns{display:flex;gap:8px}
+.backup .btns .btn{flex:1}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<input type="file" id="importFile" accept=".json,application/json" hidden>
+<script id="app">
+(function(){
+'use strict';
+var root=document.getElementById('root');
+var esc=function(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})};
+var LKEY='dinner-rotation-state',storageOK=true,state;
+try{state=JSON.parse(localStorage.getItem(LKEY)||'null')}catch(e){storageOK=false}
+function normalise(s){s=(s&&typeof s==='object')?s:{};s.meals=Array.isArray(s.meals)?s.meals:[];s.weeks=s.weeks||{};s.drafts=s.drafts||{};s.meals.forEach(function(m){m.dates=Array.isArray(m.dates)?m.dates:[]});return s}
+state=normalise(state);
+if(navigator.storage&&navigator.storage.persist){try{navigator.storage.persist()}catch(e){}}
+
+/* ---------- dates ---------- */
+var MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function pad(n){return (n<10?'0':'')+n}
+function iso(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
+function parse(s){var p=s.split('-').map(Number);return new Date(p[0],p[1]-1,p[2])}
+function addDays(d,n){var x=new Date(d.getFullYear(),d.getMonth(),d.getDate());x.setDate(x.getDate()+n);return x}
+function monday(d){var x=new Date(d.getFullYear(),d.getMonth(),d.getDate());return addDays(x,-((x.getDay()+6)%7))}
+function thisWeek(){return iso(monday(new Date()))}
+function nextWeek(){return iso(addDays(monday(new Date()),7))}
+function fmt(s){var d=parse(s);return d.getDate()+' '+MON[d.getMonth()]+(d.getFullYear()!==new Date().getFullYear()?' '+d.getFullYear():'')}
+function weeksFromNow(s){return Math.round((parse(iso(monday(parse(s))))-parse(thisWeek()))/(7*864e5))}
+function lastHad(m){return m.dates.length?m.dates.reduce(function(a,b){return a>b?a:b}):null}
+function ago(s){
+  if(!s)return 'Never';
+  var w=-weeksFromNow(s);
+  if(w<0)return w===-1?'Next week':'In '+(-w)+' weeks';
+  if(w===0)return 'This week';
+  if(w===1)return 'Last week';
+  if(w<9)return w+' weeks ago';
+  var mo=Math.round(w/4.345);
+  if(mo<12)return mo+' months ago';
+  return (Math.round(w/52.18*10)/10)+' yrs ago';
+}
+function weekLabel(ws){var w=weeksFromNow(ws);return w===0?'This week':w===1?'Next week':w===-1?'Last week':w>0?'In '+w+' weeks':(-w)+' weeks ago'}
+function byId(id){for(var i=0;i<state.meals.length;i++)if(state.meals[i].id===id)return state.meals[i];return null}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
+function staleClass(m){var l=lastHad(m);if(!l)return 'never';return -weeksFromNow(l)>=8?'old':''}
+function sortOldest(a,b){var la=lastHad(a),lb=lastHad(b);if(la===lb)return a.name.localeCompare(b.name);if(!la)return -1;if(!lb)return 1;return la<lb?-1:1}
+
+/* ---------- ui state ---------- */
+var view='plan',selWeek=nextWeek(),planQ='',mealQ='',sort='oldest',sheetId=null;
+function readHash(){
+  var h=location.hash.slice(1);
+  if(h==='meals'){view='meals'}
+  else{view='plan';var m=h.match(/^plan-(\d{4}-\d{2}-\d{2})$/);if(m)selWeek=m[1]}
+}
+function setHash(){
+  var h=view==='meals'?'meals':'plan-'+selWeek;
+  if(location.hash.slice(1)!==h){try{history.replaceState(null,'','#'+h)}catch(e){location.hash=h}}
+}
+readHash();
+
+/* drafts: unlocked selections */
+function getDraft(ws){return (state.drafts[ws]||[]).filter(byId)}
+function setDraft(ws,ids){state.drafts[ws]=ids;if(!ids.length)delete state.drafts[ws];save()}
+
+/* ---------- persistence ---------- */
+function save(){
+  try{localStorage.setItem(LKEY,JSON.stringify(state));storageOK=true}
+  catch(e){if(storageOK){storageOK=false;render()}}
+}
+/* another tab changed the data */
+window.addEventListener('storage',function(e){if(e.key===LKEY&&e.newValue){try{state=normalise(JSON.parse(e.newValue));render()}catch(x){}}});
+
+/* ---------- backup ---------- */
+function exportData(){
+  var stamp=iso(new Date());
+  var blob=new Blob([JSON.stringify({app:'dinner-rotation',exported:new Date().toISOString(),data:state},null,2)],{type:'application/json'});
+  var name='dinner-rotation-'+stamp+'.json';
+  var file;try{file=new File([blob],name,{type:'application/json'})}catch(e){}
+  if(file&&navigator.canShare&&navigator.canShare({files:[file]})){
+    navigator.share({files:[file],title:'Dinner Rotation backup'}).catch(function(err){if(err&&err.name!=='AbortError')download(blob,name)});
+  }else download(blob,name);
+}
+function download(blob,name){
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();
+  setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},1000);toast('Backup saved');
+}
+var pendingImport=null;
+function importData(file){
+  var r=new FileReader();
+  r.onload=function(){
+    try{
+      var j=JSON.parse(r.result),d=j&&j.data?j.data:j;
+      if(!d||!Array.isArray(d.meals))throw 0;
+      pendingImport=normalise(d);render();
+    }catch(e){toast('That isn’t a Dinner Rotation backup')}
+  };
+  r.readAsText(file);
+}
+document.getElementById('importFile').addEventListener('change',function(e){var f=e.target.files[0];if(f)importData(f);e.target.value=''});
+
+/* ---------- feedback ---------- */
+var toastEl,toastT;
+function toast(msg){if(!toastEl)return;toastEl.textContent=msg;toastEl.classList.add('on');clearTimeout(toastT);toastT=setTimeout(function(){toastEl.classList.remove('on')},2200)}
+
+/* ---------- actions ---------- */
+function addMeal(name){
+  name=name.trim().replace(/\s+/g,' ');
+  if(!name)return false;
+  if(state.meals.some(function(m){return m.name.toLowerCase()===name.toLowerCase()})){toast('Already on the list');return false}
+  state.meals.push({id:uid(),name:name,dates:[]});save();toast('Added '+name);return true;
+}
+function deleteMeal(id){
+  state.meals=state.meals.filter(function(m){return m.id!==id});
+  Object.keys(state.weeks).forEach(function(k){state.weeks[k].meals=state.weeks[k].meals.filter(function(x){return x!==id})});
+  Object.keys(state.drafts).forEach(function(k){state.drafts[k]=state.drafts[k].filter(function(x){return x!==id});if(!state.drafts[k].length)delete state.drafts[k]});
+  save();
+}
+function lockWeek(ws){
+  var ids=getDraft(ws);if(!ids.length)return;
+  ids.forEach(function(id){var m=byId(id);if(m&&m.dates.indexOf(ws)<0)m.dates.push(ws)});
+  state.weeks[ws]={meals:ids,locked:true};
+  setDraft(ws,[]);save();toast('Week locked in');
+}
+function unlockWeek(ws){
+  var wk=state.weeks[ws];if(!wk)return;
+  wk.meals.forEach(function(id){var m=byId(id);if(m)m.dates=m.dates.filter(function(d){return d!==ws})});
+  setDraft(ws,wk.meals.filter(byId));
+  delete state.weeks[ws];save();toast('Week unlocked');
+}
+
+/* ---------- render ---------- */
+function render(){
+  setHash();
+  var h='<div class="app"><header><h1>Dinner Rotation</h1></header>';
+  if(!storageOK)h+='<div class="banner">This browser isn’t letting the app save (private browsing?). Changes will be lost when you close it.</div>';
+  h+='<div id="view"></div></div>';
+  h+='<div class="dock"><div class="in"><div id="dockAct"></div><nav class="tabs"><a href="#plan-'+selWeek+'" data-tab="plan" class="'+(view==='plan'?'on':'')+'">Plan week</a><a href="#meals" data-tab="meals" class="'+(view==='meals'?'on':'')+'">Meals ('+state.meals.length+')</a></nav></div></div>';
+  h+='<div class="toast" id="toast"></div><div id="sheetHost"></div>';
+  root.innerHTML=h;
+  toastEl=document.getElementById('toast');
+  if(view==='plan')renderPlan();else renderMeals();
+  renderSheet();
+}
+
+function mealRow(m,opts){
+  var l=lastHad(m),cls='row '+staleClass(m)+(opts.sel?' sel':'');
+  return '<button class="'+cls+'" data-'+opts.act+'="'+m.id+'">'+(opts.tick?'<span class="tick">'+(opts.sel?'✓':'')+'</span>':'')+
+    '<span class="nm">'+esc(m.name)+'</span><span class="ago">'+ago(l)+(l?'<small>'+fmt(l)+'</small>':'')+'</span></button>';
+}
+
+function renderPlan(){
+  var v=document.getElementById('view'),ws=selWeek,wk=state.weeks[ws],locked=!!(wk&&wk.locked);
+  var end=iso(addDays(parse(ws),6));
+  var h='<div class="weeknav"><button data-wk="-1" aria-label="Previous week">‹</button><div class="mid"><div class="rel">'+weekLabel(ws)+(locked?'<span class="lockbadge">LOCKED</span>':'')+'</div><div class="dt">'+fmt(ws)+' – '+fmt(end)+'</div></div><button data-wk="1" aria-label="Next week">›</button></div>';
+  var act='';
+  if(locked){
+    var ms=wk.meals.map(byId).filter(Boolean);
+    h+='<div class="sec">Locked in ('+ms.length+')</div>';
+    h+=ms.length?'<div class="list">'+ms.map(function(m){return '<div class="row sel"><span class="tick">✓</span><span class="nm">'+esc(m.name)+'</span></div>'}).join('')+'</div>':'<div class="empty">No meals (they may have been deleted).</div>';
+    h+='<p class="note">These meals now show this week as their last-had date. Unlock to change the selection — their previous dates are restored.</p>';
+    act='<button class="btn ghost full" id="unlock">Unlock this week</button>';
+  }else{
+    var sel=getDraft(ws);
+    h+='<div class="sec">Selected ('+sel.length+')</div>';
+    h+=sel.length?'<div class="chips">'+sel.map(function(id){return '<button class="chip" data-unsel="'+id+'">'+esc(byId(id).name)+' <span>×</span></button>'}).join('')+'</div>':'<div class="empty">Tap meals below to add them to this week. Longest-ago meals are at the top.</div>';
+    h+='<div class="sec">Choose meals</div><input class="search" id="planQ" type="search" placeholder="Search meals" value="'+esc(planQ)+'"><div id="planList"></div>';
+    act='<button class="btn full" id="lock"'+(sel.length?'':' disabled')+'>Lock in '+(sel.length||'')+' meal'+(sel.length===1?'':'s')+' for '+weekLabel(ws).toLowerCase()+'</button>';
+  }
+  v.innerHTML=h;
+  document.getElementById('dockAct').innerHTML='<div class="act">'+act+'</div>';
+  if(!locked)renderPlanList();
+}
+function renderPlanList(){
+  var el=document.getElementById('planList');if(!el)return;
+  if(!state.meals.length){el.innerHTML='<div class="empty">No meals yet — add some in the <a href="#meals">Meals</a> tab.</div>';return}
+  var sel=getDraft(selWeek),q=planQ.trim().toLowerCase();
+  var ms=state.meals.slice().sort(sortOldest).filter(function(m){return !q||m.name.toLowerCase().indexOf(q)>=0});
+  el.innerHTML=ms.length?'<div class="list">'+ms.map(function(m){return mealRow(m,{act:'tog',tick:true,sel:sel.indexOf(m.id)>=0})}).join('')+'</div>':'<div class="empty">No matches.</div>';
+}
+
+function renderMeals(){
+  var v=document.getElementById('view');
+  var h='<form class="addrow" id="addForm" autocomplete="off"><input id="addName" placeholder="Add a meal…" enterkeyhint="done"><button class="btn" type="submit">Add</button></form>';
+  if(state.meals.length){
+    h+='<div class="seg"><button data-sort="oldest" class="'+(sort==='oldest'?'on':'')+'">Longest ago</button><button data-sort="az" class="'+(sort==='az'?'on':'')+'">A–Z</button></div>';
+    h+='<div style="margin-top:10px"><input class="search" id="mealQ" type="search" placeholder="Search meals" value="'+esc(mealQ)+'"></div>';
+  }
+  h+='<div id="mealList"></div>';
+  h+='<div class="backup"><div class="sec" style="margin-top:0">Backup</div><div class="btns"><button class="btn ghost" id="exportBtn">Export backup</button><button class="btn ghost" id="importBtn">Restore backup</button></div><p class="note">Your meals live only in this browser on this device. Export now and then (e.g. to Files, Drive or email) so a cleared browser or new phone doesn’t lose them.</p></div>';
+  v.innerHTML=h;
+  document.getElementById('dockAct').innerHTML='';
+  renderMealList();
+}
+function renderMealList(){
+  var el=document.getElementById('mealList');if(!el)return;
+  if(!state.meals.length){el.innerHTML='<div class="empty" style="padding-top:18px">Add the dinners you rotate through. Tap a meal later to rename it, set when you last had it, or delete it.</div>';return}
+  var q=mealQ.trim().toLowerCase();
+  var ms=state.meals.slice().sort(sort==='az'?function(a,b){return a.name.localeCompare(b.name)}:sortOldest).filter(function(m){return !q||m.name.toLowerCase().indexOf(q)>=0});
+  el.innerHTML=ms.length?'<div class="list">'+ms.map(function(m){return mealRow(m,{act:'open'})}).join('')+'</div>':'<div class="empty">No matches.</div>';
+}
+
+function renderSheet(){
+  var host=document.getElementById('sheetHost');if(!host)return;
+  if(pendingImport){
+    var n=pendingImport.meals.length,w=Object.keys(pendingImport.weeks).length;
+    host.innerHTML='<div class="ov"><div class="sheet" role="dialog" aria-label="Restore backup"><h2>Restore backup?</h2><p>This backup has <b>'+n+'</b> meal'+(n===1?'':'s')+' and <b>'+w+'</b> locked week'+(w===1?'':'s')+'. It will <b>replace</b> everything currently in the app ('+state.meals.length+' meals).</p><div style="display:flex;gap:8px;margin-top:18px"><button class="btn ghost" id="impNo" style="flex:1">Cancel</button><button class="btn" id="impYes" style="flex:1">Replace</button></div></div></div>';
+    return;
+  }
+  var m=sheetId&&byId(sheetId);
+  if(!m){host.innerHTML='';return}
+  var ds=m.dates.slice().sort().reverse();
+  host.innerHTML='<div class="ov" id="ov"><div class="sheet" role="dialog" aria-label="Edit meal">'+
+    '<h2>Edit meal</h2>'+
+    '<label for="rn">Name</label><input id="rn" value="'+esc(m.name)+'">'+
+    '<label>History</label>'+(ds.length?'<div class="hist">'+ds.map(function(d){return '<div><span>'+fmt(d)+' <span style="color:var(--mute);font-size:13px">· '+ago(d)+'</span></span><button data-rmdate="'+d+'" aria-label="Remove date">×</button></div>'}).join('')+'</div>':'<div class="empty" style="padding:4px 2px">Never had — add a date if you know roughly when.</div>')+
+    '<label for="nd">Add a date you had it</label><div class="addrow"><input type="date" id="nd" value="'+iso(new Date())+'" max="'+iso(addDays(new Date(),60))+'"><button class="btn ghost" id="addDate">Add</button></div>'+
+    '<div style="display:flex;gap:8px;margin-top:22px"><button class="btn danger" id="del">Delete</button><button class="btn" id="done" style="flex:1">Done</button></div>'+
+    '</div></div>';
+}
+function closeSheet(){
+  var m=sheetId&&byId(sheetId),rn=document.getElementById('rn');
+  if(m&&rn){
+    var nn=rn.value.trim().replace(/\s+/g,' ');
+    if(nn&&nn!==m.name){
+      if(state.meals.some(function(x){return x!==m&&x.name.toLowerCase()===nn.toLowerCase()}))toast('Another meal has that name');
+      else{m.name=nn;save()}
+    }
+  }
+  sheetId=null;render();
+}
+
+/* ---------- events ---------- */
+var delArm=null;
+root.addEventListener('click',function(e){
+  var t=e.target.closest('button,a');if(!t)return;
+  var d=t.dataset;
+  if(d.tab){e.preventDefault();view=d.tab;sheetId=null;render();window.scrollTo(0,0);return}
+  if(t.tagName==='A'&&t.getAttribute('href')==='#meals'){e.preventDefault();view='meals';render();return}
+  if(d.wk){selWeek=iso(addDays(parse(selWeek),7*Number(d.wk)));planQ='';render();return}
+  if(d.tog){var s=getDraft(selWeek),i=s.indexOf(d.tog);if(i>=0)s.splice(i,1);else s.push(d.tog);setDraft(selWeek,s);renderPlan();return}
+  if(d.unsel){setDraft(selWeek,getDraft(selWeek).filter(function(x){return x!==d.unsel}));renderPlan();return}
+  if(t.id==='lock'){lockWeek(selWeek);renderPlan();return}
+  if(t.id==='unlock'){unlockWeek(selWeek);renderPlan();return}
+  if(d.sort){sort=d.sort;renderMeals();return}
+  if(d.open){sheetId=d.open;delArm=null;renderSheet();return}
+  if(t.id==='exportBtn'){exportData();return}
+  if(t.id==='importBtn'){document.getElementById('importFile').click();return}
+  if(t.id==='impNo'){pendingImport=null;renderSheet();return}
+  if(t.id==='impYes'){state=pendingImport;pendingImport=null;save();render();toast('Backup restored');return}
+  var m=sheetId&&byId(sheetId);
+  if(m){
+    if(d.rmdate){m.dates=m.dates.filter(function(x){return x!==d.rmdate});save();renderSheet();renderMealList();return}
+    if(t.id==='addDate'){var v=document.getElementById('nd').value;if(v&&m.dates.indexOf(v)<0){m.dates.push(v);save();renderSheet();renderMealList()}return}
+    if(t.id==='done'){closeSheet();return}
+    if(t.id==='del'){
+      if(delArm===m.id){var nm=m.name;deleteMeal(m.id);sheetId=null;render();toast('Deleted '+nm);return}
+      delArm=m.id;t.classList.add('arm');t.textContent='Tap again';setTimeout(function(){if(delArm===m.id){delArm=null;t.classList.remove('arm');t.textContent='Delete'}},3000);return;
+    }
+  }
+});
+root.addEventListener('click',function(e){if(e.target.id==='ov')closeSheet()});
+root.addEventListener('submit',function(e){
+  if(e.target.id!=='addForm')return;
+  e.preventDefault();
+  var inp=document.getElementById('addName');
+  if(addMeal(inp.value)){inp.value='';var tabs=document.querySelector('[data-tab="meals"]');if(tabs)tabs.textContent='Meals ('+state.meals.length+')';renderMealList()}
+  inp.focus();
+});
+root.addEventListener('input',function(e){
+  if(e.target.id==='planQ'){planQ=e.target.value;renderPlanList()}
+  if(e.target.id==='mealQ'){mealQ=e.target.value;renderMealList()}
+});
+window.addEventListener('hashchange',function(){readHash();render()});
+
+render();
+if('serviceWorker' in navigator&&location.protocol==='https:'){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})})}
+})();
+</script>
+</body>
+</html>
